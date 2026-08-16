@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 
 const { connectDB } = require("../config/db");
 const { uploadBuffer } = require("../config/cloudinary");
+const { getStripe } = require("../config/stripe");
 const upload = require("../middleware/upload");
 const Registration = require("../models/Registration");
 
@@ -94,7 +95,7 @@ function validateRegistration(body, file) {
     errors.notAvailableOn = "Select at least one match you are not available on";
   }
   if (values.notAvailableOn.some((match) => !matchOptions.has(match))) {
-    errors.notAvailableOn = "Select only matches from the Indoor Community League 1.0 schedule";
+    errors.notAvailableOn = "Select only matches from The Masked Cup schedule";
   }
   if (!franchiseInterestOptions.has(values.franchiseInterest)) {
     errors.franchiseInterest = "Select whether you are interested in owning a team franchise";
@@ -129,6 +130,10 @@ function mapRegistration(registration) {
     notAvailableOn: registration.notAvailableOn,
     franchiseInterest: registration.franchiseInterest,
     feeAgreement: registration.feeAgreement,
+    paymentStatus: registration.paymentStatus || "unpaid",
+    paymentAmount: registration.paymentAmount || 15900,
+    paymentCurrency: registration.paymentCurrency || "aed",
+    paidAt: registration.paidAt,
     photoPath: photoUrl,
     photoUrl,
     createdAt: registration.createdAt,
@@ -141,7 +146,7 @@ router.get("/", async (_req, res, next) => {
     const registrations = await Registration.find()
       .sort({ createdAt: -1 })
       .select(
-        "firstName lastName fullName email mobile whatsappNumber jerseyName jerseyNumber jerseySize preferredSleeves currentClub availability notAvailableOn franchiseInterest feeAgreement photoUrl photoStorage createdAt",
+        "firstName lastName fullName email mobile whatsappNumber jerseyName jerseyNumber jerseySize preferredSleeves currentClub availability notAvailableOn franchiseInterest feeAgreement photoUrl photoStorage paymentStatus paymentAmount paymentCurrency paidAt createdAt",
       )
       .limit(500)
       .lean({ virtuals: true });
@@ -237,12 +242,44 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
       photoUrl,
       photoStorage: uploadResult ? "cloudinary" : "mongodb",
       cloudinaryPublicId: uploadResult?.public_id || null,
+      paymentStatus: "unpaid",
+      paymentAmount: 15900,
+      paymentCurrency: "aed",
     });
+
+    const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+    let checkoutSession;
+    try {
+      checkoutSession = await getStripe().checkout.sessions.create({
+        mode: "payment",
+        customer_email: values.email,
+        client_reference_id: registration.id,
+        metadata: { registrationId: registration.id },
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: "aed",
+              unit_amount: 15900,
+              product_data: { name: "The Masked Cup Registration" },
+            },
+          },
+        ],
+        success_url: `${frontendUrl}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${frontendUrl}/thank-you?payment=cancelled`,
+      });
+      registration.stripeCheckoutSessionId = checkoutSession.id;
+      await registration.save();
+    } catch (stripeError) {
+      await Registration.deleteOne({ _id: registration._id });
+      throw stripeError;
+    }
 
     return res.status(201).json({
       ok: true,
-      message: "Registration submitted successfully.",
+      message: "Registration saved. Continue to payment.",
       registration: mapRegistration(registration),
+      checkoutUrl: checkoutSession.url,
     });
   } catch (error) {
     if (error?.code === 11000) {

@@ -51,6 +51,17 @@ const registrationSchema = new mongoose.Schema(
       default: "mongodb",
     },
     cloudinaryPublicId: { type: String, default: null },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "failed", "expired"],
+      default: "unpaid",
+      index: true,
+    },
+    paymentAmount: { type: Number, default: 15900 },
+    paymentCurrency: { type: String, default: "aed" },
+    stripeCheckoutSessionId: { type: String, default: null, unique: true, sparse: true },
+    stripePaymentIntentId: { type: String, default: null },
+    paidAt: { type: Date, default: null },
   },
   {
     timestamps: true,

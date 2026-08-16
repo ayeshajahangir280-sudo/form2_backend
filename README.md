@@ -1,4 +1,4 @@
-# Indoor Community League 1.0 Registration Backend
+# The Masked Cup Registration Backend
 
 Express + MongoDB + Cloudinary backend for the registration form. It is ready for Render Web Service deployment.
 
@@ -68,6 +68,6 @@ create a webhook endpoint pointing to
 
 After Render deploys, copy the Render backend URL and set the frontend API base URL to that Render URL.
 
-The registration endpoint validates the seven Indoor Community League 1.0 match slots,
+The registration endpoint validates the seven The Masked Cup match slots,
 the AED 50/- registration and AED 40/- per-match fee agreement, and the required
 team-franchise interest response submitted by the frontend.

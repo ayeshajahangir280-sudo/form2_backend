@@ -19,13 +19,8 @@ const franchiseInterestOptions = new Set([
   "No, I am not interested.",
 ]);
 const matchOptions = new Set([
-  "20 Aug 2026 — 21:00",
-  "23 Aug 2026 — 07:30",
-  "25 Aug 2026 — 21:00",
-  "30 Aug 2026 — 07:30",
-  "01 Sep 2026 — 21:00",
-  "03 Sep 2026 — 21:00",
-  "06 Sep 2026 — 07:30",
+  "11 Sep 2026 — 19:00 onwards",
+  "13 Sep 2026 — 17:00 onwards",
 ]);
 
 function asArray(value) {

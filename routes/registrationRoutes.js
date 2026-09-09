@@ -196,6 +196,25 @@ router.get("/:id/photo", async (req, res, next) => {
   }
 });
 
+router.delete("/:id", async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ ok: false, message: "Submission not found" });
+    }
+
+    await connectDB();
+    const deletedRegistration = await Registration.findByIdAndDelete(req.params.id).lean();
+
+    if (!deletedRegistration) {
+      return res.status(404).json({ ok: false, message: "Submission not found" });
+    }
+
+    return res.json({ ok: true, message: "Submission deleted" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.post("/", upload.single("photo"), async (req, res, next) => {
   try {
     const { errors, values } = validateRegistration(req.body, req.file);

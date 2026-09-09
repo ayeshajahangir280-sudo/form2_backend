@@ -50,8 +50,8 @@ app.get("/", (_req, res) => {
   res.json({
     ok: true,
     service: "The Masked Cup registration API",
-    registrationFee: "AED 50/-",
-    matchFee: "AED 40/- per match",
+    registrationFee: "AED 60/-",
+    franchiseOwnershipFee: "AED 500/-",
     routes: ["/api/health", "/api/registrations", "/api/payments/webhook"],
   });
 });

@@ -60,7 +60,7 @@ CLOUDINARY_FOLDER=registration-photos
 - `POST /api/payments/webhook` (configure this URL in Stripe)
 - `GET /api/payments/session/:sessionId`
 
-The form creates a Stripe Checkout payment for AED 159. In Stripe Workbench,
+The form creates a Stripe Checkout payment for AED 60. In Stripe Workbench,
 create a webhook endpoint pointing to
 `https://YOUR-BACKEND-DOMAIN/api/payments/webhook` and subscribe to
 `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
@@ -68,6 +68,6 @@ create a webhook endpoint pointing to
 
 After Render deploys, copy the Render backend URL and set the frontend API base URL to that Render URL.
 
-The registration endpoint validates the seven The Masked Cup match slots,
-the AED 50/- registration and AED 40/- per-match fee agreement, and the required
+The registration endpoint validates the ten The Masked Cup match dates,
+the AED 60/- registration fee agreement, and the required AED 500/-
 team-franchise interest response submitted by the frontend.

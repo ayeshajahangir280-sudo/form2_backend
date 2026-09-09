@@ -19,8 +19,16 @@ const franchiseInterestOptions = new Set([
   "No, I am not interested.",
 ]);
 const matchOptions = new Set([
-  "11 Sep 2026 — 19:00 onwards",
-  "13 Sep 2026 — 17:00 onwards",
+  "29 Sep 2026",
+  "05 Oct 2026",
+  "06 Oct 2026",
+  "08 Oct 2026",
+  "13 Oct 2026",
+  "15 Oct 2026",
+  "20 Oct 2026",
+  "22 Oct 2026",
+  "27 Oct 2026",
+  "29 Oct 2026",
 ]);
 
 function asArray(value) {
@@ -126,7 +134,7 @@ function mapRegistration(registration) {
     franchiseInterest: registration.franchiseInterest,
     feeAgreement: registration.feeAgreement,
     paymentStatus: registration.paymentStatus || "unpaid",
-    paymentAmount: registration.paymentAmount || 15900,
+    paymentAmount: registration.paymentAmount || 6000,
     paymentCurrency: registration.paymentCurrency || "aed",
     paidAt: registration.paidAt,
     photoPath: photoUrl,
@@ -238,7 +246,7 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
       photoStorage: uploadResult ? "cloudinary" : "mongodb",
       cloudinaryPublicId: uploadResult?.public_id || null,
       paymentStatus: "unpaid",
-      paymentAmount: 15900,
+      paymentAmount: 6000,
       paymentCurrency: "aed",
     });
 
@@ -255,7 +263,7 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
             quantity: 1,
             price_data: {
               currency: "aed",
-              unit_amount: 15900,
+              unit_amount: 6000,
               product_data: { name: "The Masked Cup Registration" },
             },
           },

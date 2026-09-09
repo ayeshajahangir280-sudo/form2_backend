@@ -57,7 +57,7 @@ const registrationSchema = new mongoose.Schema(
       default: "unpaid",
       index: true,
     },
-    paymentAmount: { type: Number, default: 15900 },
+    paymentAmount: { type: Number, default: 6000 },
     paymentCurrency: { type: String, default: "aed" },
     stripeCheckoutSessionId: { type: String, default: null, unique: true, sparse: true },
     stripePaymentIntentId: { type: String, default: null },

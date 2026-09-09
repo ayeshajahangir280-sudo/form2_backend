@@ -12,6 +12,7 @@ const port = process.env.PORT || 4000;
 
 const defaultAllowedOrigins = [
   "https://reg-form-1.vercel.app",
+  "https://themaskedcup.stride-events.net",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
@@ -72,6 +73,13 @@ app.use((_req, res) => {
 });
 
 app.use((error, _req, res, _next) => {
+  if (error.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      ok: false,
+      message: "Origin is not allowed by CORS",
+    });
+  }
+
   if (error.message === "Only JPG, JPEG, or PNG files are allowed") {
     return res.status(400).json({
       ok: false,

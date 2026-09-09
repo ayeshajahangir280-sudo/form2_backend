@@ -17,10 +17,11 @@ const defaultAllowedOrigins = [
   "http://localhost:5173",
 ];
 
-const allowedOrigins = (process.env.CORS_ORIGIN || defaultAllowedOrigins.join(","))
+const configuredAllowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...configuredAllowedOrigins])];
 
 const corsOptions = {
   origin(origin, callback) {

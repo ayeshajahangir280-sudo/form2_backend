@@ -11,9 +11,20 @@ const router = express.Router();
 
 const phoneRegex = /^(\+9715\d{8}|\d{10})$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const jerseySizes = new Set(["Small", "Medium", "Large", "XL", "XXL", "3XL", "4XL"]);
+const jerseySizes = new Set([
+  "Small",
+  "Medium",
+  "Large",
+  "XL",
+  "XXL",
+  "3XL",
+  "4XL",
+]);
 const sleeveOptions = new Set(["Full Sleeves", "Half Sleeves"]);
-const availabilityOptions = new Set(["Available all matches", "Missing few matches"]);
+const availabilityOptions = new Set([
+  "Available all matches",
+  "Missing few matches",
+]);
 const franchiseInterestOptions = new Set([
   "Yes, I am interested.",
   "No, I am not interested.",
@@ -49,7 +60,8 @@ function normalizePhone(value) {
 
 function equivalentPhoneValues(value) {
   const normalized = normalizePhone(value);
-  if (/^05\d{8}$/.test(normalized)) return [normalized, `+971${normalized.slice(1)}`];
+  if (/^05\d{8}$/.test(normalized))
+    return [normalized, `+971${normalized.slice(1)}`];
   return [normalized];
 }
 
@@ -81,29 +93,45 @@ function validateRegistration(body, file) {
     feeAgreement: body.feeAgreement === true || body.feeAgreement === "true",
   };
 
-  if (!values.firstName || values.firstName.length > 80) errors.firstName = "First name is required";
-  if (!values.lastName || values.lastName.length > 80) errors.lastName = "Last name is required";
-  if (!phoneRegex.test(values.mobile)) errors.mobile = "Use 10 digits or UAE format +9715XXXXXXXX";
-  if (!emailRegex.test(values.email) || values.email.length > 255) errors.email = "Enter a valid email address";
-  if (!phoneRegex.test(values.whatsappNumber)) errors.whatsappNumber = "Use 10 digits or UAE format +9715XXXXXXXX";
-  if (!values.jerseyName || values.jerseyName.length > 80) errors.jerseyName = "Name of jersey is required";
-  if (!/^\d{1,3}$/.test(values.jerseyNumber)) errors.jerseyNumber = "Jersey number must be whole numbers only";
-  if (!jerseySizes.has(values.jerseySize)) errors.jerseySize = "Select a jersey size";
-  if (!sleeveOptions.has(values.preferredSleeves)) errors.preferredSleeves = "Select preferred sleeves";
+  if (!values.firstName || values.firstName.length > 80)
+    errors.firstName = "First name is required";
+  if (!values.lastName || values.lastName.length > 80)
+    errors.lastName = "Last name is required";
+  if (!phoneRegex.test(values.mobile))
+    errors.mobile = "Use 10 digits or UAE format +9715XXXXXXXX";
+  if (!emailRegex.test(values.email) || values.email.length > 255)
+    errors.email = "Enter a valid email address";
+  if (!phoneRegex.test(values.whatsappNumber))
+    errors.whatsappNumber = "Use 10 digits or UAE format +9715XXXXXXXX";
+  if (!values.jerseyName || values.jerseyName.length > 80)
+    errors.jerseyName = "Name of jersey is required";
+  if (!/^\d{1,3}$/.test(values.jerseyNumber))
+    errors.jerseyNumber = "Jersey number must be whole numbers only";
+  if (!jerseySizes.has(values.jerseySize))
+    errors.jerseySize = "Select a jersey size";
+  if (!sleeveOptions.has(values.preferredSleeves))
+    errors.preferredSleeves = "Select preferred sleeves";
   if (values.currentClub && values.currentClub.length > 120) {
     errors.currentClub = "Current club/team must be 120 characters or fewer";
   }
-  if (!availabilityOptions.has(values.availability)) errors.availability = "Select availability";
-  if (values.availability === "Missing few matches" && values.notAvailableOn.length === 0) {
-    errors.notAvailableOn = "Select at least one match you are not available on";
+  if (!availabilityOptions.has(values.availability))
+    errors.availability = "Select availability";
+  if (
+    values.availability === "Missing few matches" &&
+    values.notAvailableOn.length === 0
+  ) {
+    errors.notAvailableOn =
+      "Select at least one match you are not available on";
   }
   if (values.notAvailableOn.some((match) => !matchOptions.has(match))) {
     errors.notAvailableOn = "Select only matches from The Masked Cup schedule";
   }
   if (!franchiseInterestOptions.has(values.franchiseInterest)) {
-    errors.franchiseInterest = "Select whether you are interested in owning a team franchise";
+    errors.franchiseInterest =
+      "Select whether you are interested in owning a team franchise";
   }
-  if (!values.feeAgreement) errors.feeAgreement = "You must agree to the registration and match fees";
+  if (!values.feeAgreement)
+    errors.feeAgreement = "You must agree to the registration and match fees";
   if (!file) errors.photo = "Upload a clear headshot photo under 2 MB";
 
   return { errors, values };
@@ -199,17 +227,59 @@ router.get("/:id/photo", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({ ok: false, message: "Submission not found" });
+      return res
+        .status(404)
+        .json({ ok: false, message: "Submission not found" });
     }
 
     await connectDB();
-    const deletedRegistration = await Registration.findByIdAndDelete(req.params.id).lean();
+    const deletedRegistration = await Registration.findByIdAndDelete(
+      req.params.id,
+    ).lean();
 
     if (!deletedRegistration) {
-      return res.status(404).json({ ok: false, message: "Submission not found" });
+      return res
+        .status(404)
+        .json({ ok: false, message: "Submission not found" });
     }
 
     return res.json({ ok: true, message: "Submission deleted" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch("/:id/mark-paid", async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res
+        .status(404)
+        .json({ ok: false, message: "Submission not found" });
+    }
+
+    await connectDB();
+    const registration = await Registration.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          paymentStatus: "paid",
+          paidAt: new Date(),
+        },
+      },
+      { new: true },
+    );
+
+    if (!registration) {
+      return res
+        .status(404)
+        .json({ ok: false, message: "Submission not found" });
+    }
+
+    return res.json({
+      ok: true,
+      message: "Submission marked as paid",
+      registration: mapRegistration(registration),
+    });
   } catch (error) {
     return next(error);
   }
@@ -244,11 +314,14 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
       );
     }
 
-    const uploadPublicId = `${Date.now()}-${values.firstName}-${values.lastName}`.replace(
-      /[^a-z0-9-]/gi,
-      "-",
-    );
-    const uploadResult = await uploadBuffer(req.file.buffer, { public_id: uploadPublicId });
+    const uploadPublicId =
+      `${Date.now()}-${values.firstName}-${values.lastName}`.replace(
+        /[^a-z0-9-]/gi,
+        "-",
+      );
+    const uploadResult = await uploadBuffer(req.file.buffer, {
+      public_id: uploadPublicId,
+    });
 
     const photoUrl =
       uploadResult?.secure_url ||
@@ -269,7 +342,9 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
       paymentCurrency: "aed",
     });
 
-    const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+    const frontendUrl = (
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    ).replace(/\/$/, "");
     let checkoutSession;
     try {
       checkoutSession = await getStripe().checkout.sessions.create({
@@ -319,7 +394,10 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
         ok: false,
         message: "Please fix the highlighted fields",
         errors: Object.fromEntries(
-          Object.entries(error.errors).map(([key, value]) => [key, value.message]),
+          Object.entries(error.errors).map(([key, value]) => [
+            key,
+            value.message,
+          ]),
         ),
       });
     }

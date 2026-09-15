@@ -21,18 +21,24 @@ const configuredAllowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
-const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...configuredAllowedOrigins])];
+const allowedOrigins = [
+  ...new Set([...defaultAllowedOrigins, ...configuredAllowedOrigins]),
+];
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+    if (
+      !origin ||
+      allowedOrigins.length === 0 ||
+      allowedOrigins.includes(origin)
+    ) {
       callback(null, true);
       return;
     }
 
     callback(new Error("Not allowed by CORS"));
   },
-  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204,
 };

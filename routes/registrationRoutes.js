@@ -249,7 +249,7 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-router.patch("/:id/mark-paid", async (req, res, next) => {
+async function handleMarkPaid(req, res, next) {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res
@@ -283,7 +283,10 @@ router.patch("/:id/mark-paid", async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-});
+}
+
+router.patch("/:id/mark-paid", handleMarkPaid);
+router.post("/:id/mark-paid", handleMarkPaid);
 
 router.post("/", upload.single("photo"), async (req, res, next) => {
   try {
